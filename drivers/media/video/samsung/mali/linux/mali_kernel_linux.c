@@ -75,11 +75,11 @@ module_param(mali_boot_profiling, int, S_IRUSR | S_IRGRP | S_IROTH);
 MODULE_PARM_DESC(mali_boot_profiling, "Start profiling as a part of Mali driver initialization");
 #endif
 
-/* Export symbols from common code: mali_user_settings.c */
-#include "mali_user_settings_db.h"
-EXPORT_SYMBOL(mali_set_user_setting);
-EXPORT_SYMBOL(mali_get_user_setting);
+#if MALI_DVFS_ENABLED
+extern int mali_dvfs_control;
+module_param(mali_dvfs_control, int, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP| S_IROTH); /* rw-rw-r-- */
 MODULE_PARM_DESC(mali_dvfs_control, "Mali Current DVFS");
+#endif
 
 extern int mali_gpu_clk;
 module_param(mali_gpu_clk, int, S_IRUSR | S_IRGRP | S_IROTH); /* r--r--r-- */
@@ -100,6 +100,12 @@ MODULE_PARM_DESC(gpu_power_state, "Mali Power State");
 int mali_touch_boost_level = 0;
 module_param(mali_touch_boost_level, int, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH); /* rw--rw--r-- */
 MODULE_PARM_DESC(mali_touch_boost_level, "Mali Touch Boost Level");
+
+#ifdef CONFIG_CPU_EXYNOS4210
+int mali_use_vpll = 0;
+module_param(mali_use_vpll, int, S_IRUSR | S_IWUSR | S_IWGRP | S_IRGRP | S_IROTH); /* rw--rw--r-- */
+MODULE_PARM_DESC(mali_use_vpll, "Mali Use VPLL for Clock");
+#endif
 
 static char mali_dev_name[] = "mali"; /* should be const, but the functions we call requires non-cost */
 

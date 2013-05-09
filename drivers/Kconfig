@@ -163,6 +163,6 @@ source "drivers/felica/Kconfig"
 # Authentec
 source "drivers/interceptor/Kconfig"
 
-source "drivers/j4fs/Kconfig"
+source "drivers/frandom/Kconfig" 
 
 endmenu
