@@ -71,3 +71,9 @@ SUBSYS(timer_slack)
 
 /* */
 
+#ifdef CONFIG_CGROUP_BFQIO
+SUBSYS(bfqio)
+#endif
+
+/* */
+
