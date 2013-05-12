@@ -51,15 +51,6 @@
 #define CLK_DIV_STAT_G3D 	0x1003C62C
 #define CLK_DESC 		"clk-divider-status"
 
-#define MALI_BOTTOMLOCK_VOL	800000
-
-typedef struct mali_runtime_resumeTag{
-	int clk;
-	int vol;
-}mali_runtime_resume_table;
-
-mali_runtime_resume_table mali_runtime_resume = {108, 900000};
-
 /* lock/unlock CPU freq by Mali */
 extern int cpufreq_lock_by_mali(unsigned int freq);
 extern void cpufreq_unlock_by_mali(void);
@@ -75,8 +66,8 @@ static struct clk               *mali_clock = 0;
 
 static unsigned int GPU_MHZ  = 1000000;
 
-int mali_gpu_clk = 108;
-int mali_gpu_vol = 900000;
+int mali_gpu_clk = 160;
+int mali_gpu_vol = 1100000;
 
 #if MALI_DVFS_ENABLED
 #define MALI_DVFS_DEFAULT_STEP 0
@@ -325,12 +316,15 @@ void mali_clk_put(mali_bool binc_mali_clock)
 
 }
 
-extern int mali_use_vpll;
 
 mali_bool mali_clk_set_rate(unsigned int clk, unsigned int mhz)
 { 
 	unsigned long rate = 0;
-	mali_bool bis_vpll = mali_use_vpll;
+	mali_bool bis_vpll = MALI_FALSE;
+
+#ifdef CONFIG_VPLL_USE_FOR_TVENC
+	bis_vpll = MALI_TRUE;
+#endif
 
 	_mali_osk_lock_wait(mali_dvfs_lock, _MALI_OSK_LOCKMODE_RW);
 
@@ -501,13 +495,10 @@ void gpu_boost_on_touch(void)
   mod_timer(&boostpop_timer, jiffies + msecs_to_jiffies(1000));
 }
 
-void mali_force_mpll(void);
-void mali_restore_vpll_mode(void);
 static _mali_osk_errcode_t enable_mali_clocks(void)
 {
 	int err;
 	err = clk_enable(mali_clock);
-	mali_restore_vpll_mode();
 	MALI_DEBUG_PRINT(3,("enable_mali_clocks mali_clock %p error %d \n", mali_clock, err));
 
 	// set clock rate
@@ -521,7 +512,6 @@ static _mali_osk_errcode_t enable_mali_clocks(void)
 
 static _mali_osk_errcode_t disable_mali_clocks(void)
 {
-	mali_force_mpll();
 	clk_disable(mali_clock);
 	MALI_DEBUG_PRINT(3,("disable_mali_clocks mali_clock %p \n", mali_clock));
 
@@ -691,18 +681,4 @@ u32 pmu_get_power_up_down_info(void)
 _mali_osk_errcode_t mali_platform_power_mode_change(mali_power_mode power_mode)
 {
     MALI_SUCCESS;
-}
-
-int mali_use_vpll_save;
-void mali_restore_vpll_mode(void)
-{
-	mali_use_vpll = mali_use_vpll_save;
-}
-
-void mali_force_mpll(void)
-{
-	mali_use_vpll_save = mali_use_vpll;
-	mali_use_vpll = false;
-	mali_regulator_set_voltage(mali_gpu_vol, mali_gpu_vol);
-	mali_clk_set_rate(mali_gpu_clk, GPU_MHZ);
 }
