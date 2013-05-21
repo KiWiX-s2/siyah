@@ -1,0 +1,11 @@
+
+<!-- saved from url=(0114)https://raw.github.com/KiWiX-s2/KiWiX-s2/799cbd6ed8830d9c3a898f7c5ecae5a4bc3a0a99/drivers/frandom/10-frandom.rules -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">#
+# These are the rules for the frandom devices. In theory, we could let
+# udev's catch-all rule create the /dev node based upon the kernel name,
+# which gives correct result, except that the default MODE set in
+# 50-udev.rules (0600) is too restrictive.
+#
+
+KERNEL=="[ef]random", NAME="%k", MODE="444", OPTIONS="last_rule"
+</pre></body></html>
